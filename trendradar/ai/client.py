@@ -88,6 +88,17 @@ class AIClient:
             if key not in params:
                 params[key] = value
 
+        # 如果配置了 api_base 但未识别 provider，显式指定为 openai 兼容
+        if self.api_base and "custom_llm_provider" not in params:
+            model_lower = self.model.lower()
+            known_prefixes = (
+                "openai/", "azure/", "deepseek/", "gemini/", "claude/",
+                "anthropic/", "mistral/", "cohere/", "ollama/", "huggingface/",
+                "together_ai/", "perplexity/", "groq/", "fireworks/",
+            )
+            if not any(model_lower.startswith(p) for p in known_prefixes):
+                params["custom_llm_provider"] = "openai"
+
         # 调用 LiteLLM
         response = completion(**params)
 
